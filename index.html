@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>🚀 Lua脚本云载库</title>
+    <style>
+        body { font-family: Arial; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .script-item { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .btn { padding: 8px 15px; background: #007bff; color: white; text-decoration: none; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h1>🚀 Lua脚本云载库</h1>
+    <div id="scripts-list">加载中...</div>
+
+    <script>
+        const GITHUB_USERNAME = "YOUR_USERNAME";
+        const GITHUB_REPO = "LuaCloudScripts";
+        
+        async function loadScripts() {
+            try {
+                const response = await fetch(`https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/scripts`);
+                const files = await response.json();
+                
+                let html = '';
+                files.forEach(file => {
+                    if (file.name.endsWith('.lua')) {
+                        const rawUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${GITHUB_REPO}/main/scripts/${file.name}`;
+                        html += `
+                            <div class="script-item">
+                                <h3>${file.name}</h3>
+                                <a href="${rawUrl}" class="btn" download>下载</a>
+                                <button onclick="copyLoaderCode('${file.name}')" class="btn">复制加载代码</button>
+                            </div>
+                        `;
+                    }
+                });
+                
+                document.getElementById('scripts-list').innerHTML = html;
+            } catch (error) {
+                document.getElementById('scripts-list').innerHTML = '加载失败: ' + error;
+            }
+        }
+        
+        function copyLoaderCode(filename) {
+            const code = `http.get("https://raw.githubusercontent.com/${GITHUB_USERNAME}/${GITHUB_REPO}/main/scripts/${filename}", function(success, response)
+    if success and response.body then
+        local func = loadstring(response.body)
+        if func then pcall(func) end
+    end
+end)`;
+            navigator.clipboard.writeText(code);
+            alert('代码已复制！');
+        }
+        
+        loadScripts();
+    </script>
+</body>
+</html>
